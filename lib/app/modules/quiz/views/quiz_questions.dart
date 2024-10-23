@@ -2,17 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:mcqs_app/app/modules/quiz/controllers/quiz_controller.dart';
 
-class QuizQuestions extends StatefulWidget {
+class QuizQuestions extends GetView<QuizController> {
   const QuizQuestions({super.key});
 
   @override
-  State<QuizQuestions> createState() => _QuizQuestionsState();
-}
-
-class _QuizQuestionsState extends State<QuizQuestions> {
-  @override
   Widget build(BuildContext context) {
-    final QuizController quizController = Get.put(QuizController());
+    // final QuizController quizController = Get.put(QuizController());
     double screenWidth = MediaQuery.of(context).size.width;
     double screenHeight = MediaQuery.of(context).size.height;
 
@@ -83,7 +78,7 @@ class _QuizQuestionsState extends State<QuizQuestions> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
-                          '${quizController.mcqs.length} Questions',
+                          '${controller.mcqs.length} Questions',
                           style: const TextStyle(
                             fontWeight: FontWeight.bold,
                             color: Color(0xff1A1C1E),
@@ -92,7 +87,7 @@ class _QuizQuestionsState extends State<QuizQuestions> {
                         ),
                         Obx(()=>
                             Text(
-                              'Level 0${quizController.level.value}',
+                              'Level 0${controller.level.value}',
                               style: TextStyle(
                                 fontWeight: FontWeight.bold,
                                 color: Color(0xff1A1C1E),
@@ -107,13 +102,13 @@ class _QuizQuestionsState extends State<QuizQuestions> {
                       height: 80,
                       child: ListView.builder(
                         scrollDirection: Axis.horizontal,
-                        itemCount: quizController.mcqs.length,
+                        itemCount: controller.mcqs.length,
                         itemBuilder: (context, index) {
                           return GestureDetector(
                             onTap: () {
-                              quizController.currentIndex.value = index;
+                              controller.currentIndex.value = index;
                               // Force the UI to rebuild after changing the index
-                              quizController.selectedOption.value =
+                              controller.selectedOption.value =
                               ''; // Clear selected option when switching
                             },
                             child: Obx(() => Container(
@@ -122,7 +117,7 @@ class _QuizQuestionsState extends State<QuizQuestions> {
                               width: 32,
                               height: 32,
                               decoration: BoxDecoration(
-                                color: quizController.currentIndex.value ==
+                                color: controller.currentIndex.value ==
                                     index
                                     ? Colors.blue
                                     : Colors.white,
@@ -133,7 +128,7 @@ class _QuizQuestionsState extends State<QuizQuestions> {
                                   (index + 1).toString(),
                                   style: TextStyle(
                                     color:
-                                    quizController.currentIndex.value ==
+                                    controller.currentIndex.value ==
                                         index
                                         ? const Color(0xffFFFFFF)
                                         : Colors.black,
@@ -150,10 +145,10 @@ class _QuizQuestionsState extends State<QuizQuestions> {
                     Obx(() {
                       double circleWidth = 32; // Width of each circle
                       double margin = 4; // Margin between circles
-                      double totalWidth = quizController.mcqs.length *
+                      double totalWidth = controller.mcqs.length *
                           (circleWidth + 2 * margin);
                       double completedWidth =
-                          (quizController.currentIndex.value + 1) *
+                          (controller.currentIndex.value + 1) *
                               (circleWidth + 2 * margin);
 
                       return Stack(
@@ -199,8 +194,8 @@ class _QuizQuestionsState extends State<QuizQuestions> {
                     Expanded(
                       child: Obx(() {
                         // Get the current MCQ based on currentIndex
-                        final currentMcq = quizController
-                            .mcqs[quizController.currentIndex.value];
+                        final currentMcq = controller
+                            .mcqs[controller.currentIndex.value];
                         return Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -215,16 +210,16 @@ class _QuizQuestionsState extends State<QuizQuestions> {
                             // Display Options
                             Expanded(
                               child: ListView.builder(
-                                itemCount: quizController.currentMcq.options.length,
+                                itemCount: controller.currentMcq.options.length,
                                 itemBuilder: (context, index) {
-                                  final option = quizController.currentMcq.options[index];
-                                  final isSelected = quizController.selectedOption.value == option.letter;
-                                  final isCorrect = option.isCorrect;
+                                  final option = controller.currentMcq.options[index];
+                                  final isSelected = controller.selectedOption.value == option.letter;
+                                  // final isCorrect = option.isCorrect;
 
                                   return GestureDetector(
                                     onTap: () {
                                       // Option selection logic
-                                      quizController.selectOption(option.letter);
+                                      controller.selectOption(option.letter);
                                       // quizController.selectedOption.value = '';
                                       Get.snackbar(
                                         'Option Selected',
@@ -235,7 +230,7 @@ class _QuizQuestionsState extends State<QuizQuestions> {
                                       margin: const EdgeInsets.symmetric(vertical: 5.0), // Adds space between containers
                                       padding: const EdgeInsets.all(2.0),
                                       decoration: BoxDecoration(
-                                        color: quizController.selectedOption.value == option.letter
+                                        color: controller.selectedOption.value == option.letter
                                             ? Color(0xff4839D4)
                                             : Colors.transparent,
                                         borderRadius: BorderRadius.circular(10.0), // Rounded corners
@@ -266,7 +261,7 @@ class _QuizQuestionsState extends State<QuizQuestions> {
                                               style: TextStyle(
                                                 fontSize: 14.0,
                                                 fontWeight: FontWeight.w500,
-                                                color: quizController.selectedOption.value == option.letter
+                                                color: controller.selectedOption.value == option.letter
                                                     ? Colors.white
                                                     : Colors.black,
                                               ),
@@ -315,25 +310,23 @@ class _QuizQuestionsState extends State<QuizQuestions> {
                                 .transparent, // Make the button background transparent
                           ),
                           onPressed: () {
-                            print('Current Index of mcqs: ${quizController.currentIndex.value}');
-                            print(quizController.mcqs.length - 1 == quizController.currentIndex.value);
+                            print('Current Index of mcqs: ${controller.currentIndex.value}');
+                            print(controller.mcqs.length - 1 == controller.currentIndex.value);
 
-                            if(quizController.mcqs.length - 1 > quizController.currentIndex.value){
+                            if(controller.mcqs.length - 1 > controller.currentIndex.value){
                               // quizController.selectedOption('${quizController.mcqs[quizController.currentIndex.value]}');
-                              quizController.currentIndex.value = quizController.currentIndex.value + 1;
-                              // Force the UI to rebuild after changing the index
-                              quizController.selectedOption.value =
+                              controller.currentIndex.value = controller.currentIndex.value + 1;
+                              controller.selectedOption.value =
                               ''; // Clear selected option when switching
                             }else{
-                              quizController.score.value = 0;
+                              controller.score.value = 0;
 
-                              print('Score: ${quizController.score.value}');
+                              print('Score: ${controller.score.value}');
                               Get.offNamed('/quizscorecard');
-                              quizController.calculateScore();
+                              controller.calculateScore();
                               // Get.delete<QuizController>(force: true)
-                              quizController.currentIndex.value = 0;
-                              quizController.userSelections.clear();
-                              quizController.selectedOption.value = '';
+                              controller.currentIndex.value = 0;
+                              controller.selectedOption.value = '';
                               // quizController.score.value = 0;
 
                             }

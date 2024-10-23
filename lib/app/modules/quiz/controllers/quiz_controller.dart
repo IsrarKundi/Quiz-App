@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_gemini/flutter_gemini.dart';
 import 'package:get/get.dart';
+import 'package:get/get_rx/get_rx.dart';
 import 'package:mcqs_app/app/modules/mcqs/controllers/mcqs_controller.dart';
 
 import '../../helper/custom_widgets.dart';
@@ -153,7 +154,7 @@ class QuizController extends GetxController {
   // Observable to keep track of the selected option
   var selectedOption = ''.obs;
 
-  var userSelections = <String?>[].obs; // List to track user selections
+  RxList<String?> userSelections = <String?>[].obs; // List to track user selections
 
   // A map to store correct answers, with question number as key and correct option as value.
   RxInt score = 0.obs;
@@ -169,7 +170,10 @@ class QuizController extends GetxController {
   void selectOption(String optionLetter) {
     selectedOption.value = optionLetter;
     print(selectedOption.value);
+    print('before exception');
+    print(currentIndex.value);
     userSelections[currentIndex.value] = selectedOption.value; // Track the user's selection
+    print('after exception');
   }
 
   final count = 0.obs;
@@ -181,7 +185,6 @@ class QuizController extends GetxController {
   void dispose() {
     // Clean up resources here if needed
     super.dispose();
-
   }
 
   // Method to go to the next MCQ
@@ -199,13 +202,13 @@ class QuizController extends GetxController {
     }
   }
 
-  // Method to check if the option is correct
-  bool isCorrectOption(String letter) {
-    final option =
-        mcqs[currentIndex.value].options.firstWhere((o) => o.letter == letter);
-    print(option.isCorrect);
-    return option.isCorrect;
-  }
+  // // Method to check if the option is correct
+  // bool isCorrectOption(String letter) {
+  //   final option =
+  //       mcqs[currentIndex.value].options.firstWhere((o) => o.letter == letter);
+  //   print(option.isCorrect);
+  //   return option.isCorrect;
+  // }
 
 
 
@@ -321,7 +324,7 @@ Mcq(
       line = line.trim();
 
       // Detect the start of a new MCQ block
-      if (line.startsWith("Mcq(") || line.startsWith("**Mcq(") || line.startsWith("**MCQ") || startsWithRange(line, 1, 10)) {
+      if (line.startsWith("Mcq(") || line.startsWith("**Mcq(") || line.startsWith("*") || startsWithRange(line, 1, 10)) {
         if (currentQuestion != null && options.isNotEmpty) {
           mcqList.add(Mcq(question: currentQuestion, options: options));
         }

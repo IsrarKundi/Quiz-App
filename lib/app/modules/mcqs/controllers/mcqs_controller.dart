@@ -155,6 +155,8 @@ class McqsController extends GetxController {
 
   }
 
+  TextEditingController searchController = TextEditingController();
+  FocusNode searchFocusNode = FocusNode();
 
   ///..................................CALCULATING USER MARKS.................................
 

@@ -347,6 +347,7 @@ class _QuizScoreCardState extends State<QuizScoreCard> {
                     onPressed: () {
                       quizController.checkAndUpdateLevel();
 
+
                       // // Go back to the previous screen
                     },
                     style: ElevatedButton.styleFrom(

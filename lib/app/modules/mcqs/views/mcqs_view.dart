@@ -32,7 +32,7 @@ class McqsView extends GetView<McqsController> {
 
     return SafeArea(
       child: Scaffold(
-        resizeToAvoidBottomInset: true,
+        resizeToAvoidBottomInset: false,
         backgroundColor: Colors.white,
         body: Stack(
           children: [
@@ -113,7 +113,9 @@ class McqsView extends GetView<McqsController> {
                       const SizedBox(height: 10),
                       // Search Field
                       TextFormField(
-                        decoration: const InputDecoration(
+                        focusNode: mcqsController.searchFocusNode,
+                        controller: mcqsController.searchController,
+                        decoration: InputDecoration(
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.all(
                               Radius.circular(23),
@@ -121,7 +123,15 @@ class McqsView extends GetView<McqsController> {
                           ),
                           hintText: 'Search',
                           hintStyle: TextStyle(color: Color(0xff8E8E8E)),
-                          suffixIcon: Icon(Icons.search),
+                          suffixIcon: InkWell(
+                              onTap: () async {
+                                mcqsController.topic.value = mcqsController.searchController.text;
+                                await mcqsController.getMcqs(context);
+                                mcqsController.searchController.clear();
+                                mcqsController.searchFocusNode.unfocus();
+
+                              },
+                              child: Icon(Icons.search)),
                         ),
                       ),
                       const SizedBox(height: 24),

@@ -192,10 +192,10 @@ class McqsQuestionsView extends GetView<McqsController> {
                                               // Option selection logic
                                               controller.selectOption(option.letter);
                                               // quizController.selectedOption.value = '';
-                                              Get.snackbar(
-                                                'Option Selected',
-                                                'You selected ${option.letter}: ${option.text}',
-                                              );
+                                              // Get.snackbar(
+                                              //   'Option Selected',
+                                              //   'You selected ${option.letter}: ${option.text}',
+                                              // );
                                             },
                                             child: Obx(() => Container(
                                               margin: const EdgeInsets.symmetric(vertical: 5.0), // Adds space between containers

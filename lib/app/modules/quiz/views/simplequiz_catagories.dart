@@ -34,7 +34,7 @@ class _SimplequizCatagoriesState extends State<SimplequizCatagories> {
     double screenHeight = MediaQuery.of(context).size.height;
     return SafeArea(
       child: Scaffold(
-        resizeToAvoidBottomInset: true,
+        resizeToAvoidBottomInset: false,
         backgroundColor: Colors.white,
         body: Stack(
           children: [
@@ -115,7 +115,9 @@ class _SimplequizCatagoriesState extends State<SimplequizCatagories> {
                       const SizedBox(height: 10),
                       // Search Field
                       TextFormField(
-                        decoration: const InputDecoration(
+                        focusNode: quizController.searchFocusNode,
+                        controller: quizController.searchController,
+                        decoration: InputDecoration(
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.all(
                               Radius.circular(23),
@@ -123,7 +125,15 @@ class _SimplequizCatagoriesState extends State<SimplequizCatagories> {
                           ),
                           hintText: 'Search',
                           hintStyle: TextStyle(color: Color(0xff8E8E8E)),
-                          suffixIcon: Icon(Icons.search),
+                          suffixIcon: InkWell(
+                            onTap: () async {
+                              quizController.topic.value = quizController.searchController.text;
+                              await quizController.getQuiz(context);
+                              quizController.searchController.clear();
+                              quizController.searchFocusNode.unfocus();
+
+                            },
+                              child: Icon(Icons.search)),
                         ),
                       ),
                       const SizedBox(height: 10),

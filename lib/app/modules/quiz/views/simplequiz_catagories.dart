@@ -143,8 +143,10 @@ class _SimplequizCatagoriesState extends State<SimplequizCatagories> {
 
                             return InkWell(
                               onTap: () async {
-                                quizController.level.value = quizController.categories[index].level;
+                                quizController.level.value = quizController.categories[index].level.value;
                                 quizController.topic.value = quizController.categories[index].title;
+                                quizController.categoryIndex.value = index;
+
                                 // print(quizController.level.value);
                                 await quizController.getQuiz(context);
                                 // Get.toNamed('/quizquestions');
@@ -184,13 +186,15 @@ class _SimplequizCatagoriesState extends State<SimplequizCatagories> {
                                           const SizedBox(height: 4),
                                           Row(
                                             children: [
-                                              Text(
-                                                'Level (${category.level.toString().padLeft(2, '0')})', // Display the level
-                                                style: const TextStyle(
-                                                  fontSize: 12.37,
-                                                  color: Colors.black,
-                                                ),
-                                              ),
+                                              Obx((){
+                                                return Text(
+                                                  'Level (${category.level.toString().padLeft(2, '0')})', // Display the level
+                                                  style: const TextStyle(
+                                                    fontSize: 12.37,
+                                                    color: Colors.black,
+                                                  ),
+                                                );
+                                              }),
                                               const SizedBox(width: 37),
                                               Image.asset(
                                                 'assets/images/coins.png',

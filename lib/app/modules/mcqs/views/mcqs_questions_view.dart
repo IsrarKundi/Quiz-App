@@ -4,13 +4,13 @@ import 'package:mcqs_app/app/modules/mcqs/controllers/mcqs_controller.dart';
 import 'package:mcqs_app/app/modules/mcqs/controllers/score_card_controller.dart';
 import 'package:mcqs_app/app/modules/mcqs/views/score_card_view.dart';
 
-class McqsQuestionsView extends StatelessWidget {
+class McqsQuestionsView extends GetView<McqsController> {
   const McqsQuestionsView({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final ScoreCardController scoreCardController =
-        Get.put(ScoreCardController(totalQuestions: 10, correctAnswers: 8));
+    // final ScoreCardController scoreCardController =
+    //     Get.put(ScoreCardController(totalQuestions: 10, correctAnswers: 8));
     final McqsController mcqsController = Get.put(McqsController());
 
     double screenWidth = MediaQuery.of(context).size.width;
@@ -106,7 +106,7 @@ class McqsQuestionsView extends StatelessWidget {
                                 fontSize: 16),
                           ),
                           Text(
-                            'Level ${currentIndex.toString().padLeft(2, '0')}',
+                            'Level 0${controller.level.value}',
                             style: const TextStyle(
                                 fontWeight: FontWeight.bold,
                                 color: Color(0xff1A1C1E),
@@ -170,87 +170,84 @@ class McqsQuestionsView extends StatelessWidget {
                             const SizedBox(height: 5),
                             // Display Options
                             Expanded(
-                              child: ListView.builder(
-                                itemCount: currentMcq.options.length,
-                                itemBuilder: (context, index) {
-                                  final option = currentMcq.options[index];
+                              child: Obx(() {
+                                // Get the current MCQ based on currentIndex
+                                final currentMcq = controller
+                                    .mcqs[controller.currentIndex.value];
+                                // print(currentMcq);
+                                return Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    // Display Options
+                                    Expanded(
+                                      child: ListView.builder(
+                                        itemCount: controller.currentMcq.options.length,
+                                        itemBuilder: (context, index) {
+                                          final option = controller.currentMcq.options[index];
+                                          final isSelected = controller.selectedOption.value == option.letter;
+                                          // final isCorrect = option.isCorrect;
 
-                                  return Obx(() {
-                                    final isSelected =
-                                        mcqsController.selectedOption.value ==
-                                            option.letter;
-                                    final isCorrect = option.isCorrect;
-                                    return GestureDetector(
-                                      onTap: () {
-                                        // Option selection logic
-                                        mcqsController
-                                            .selectOption(option.letter);
-                                        Get.snackbar(
-                                          'Option Selected',
-                                          'You selected ${option.letter}: ${option.text}',
-                                        );
-                                      },
-                                      child: Container(
-                                        margin: const EdgeInsets.symmetric(
-                                            vertical:
-                                                5.0), // Adds space between containers
-                                        padding: const EdgeInsets.all(2.0),
-                                        decoration: BoxDecoration(
-                                          color: isSelected
-                                              ? (isCorrect
-                                                  ? Colors.green
-                                                  : Colors.red)
-                                              : Colors.white,
-                                          borderRadius:
-                                              BorderRadius.circular(10.0),
-                                          // boxShadow: [
-                                          //   BoxShadow(
-                                          //     color:
-                                          //         Colors.black.withOpacity(0.1),
-                                          //     spreadRadius: 2,
-                                          //     blurRadius: 5,
-                                          //     offset: const Offset(0, 3),
-                                          //   ),
-                                          // ],
-                                        ),
-                                        child: Row(
-                                          children: [
-                                            // Letter inside a circular container
-                                            Container(
-                                              padding:
-                                                  const EdgeInsets.all(10.0),
-                                              decoration: const BoxDecoration(
-                                                shape: BoxShape.circle,
-                                                color: Colors.white,
+                                          return GestureDetector(
+                                            onTap: () {
+                                              // Option selection logic
+                                              controller.selectOption(option.letter);
+                                              // quizController.selectedOption.value = '';
+                                              Get.snackbar(
+                                                'Option Selected',
+                                                'You selected ${option.letter}: ${option.text}',
+                                              );
+                                            },
+                                            child: Obx(() => Container(
+                                              margin: const EdgeInsets.symmetric(vertical: 5.0), // Adds space between containers
+                                              padding: const EdgeInsets.all(2.0),
+                                              decoration: BoxDecoration(
+                                                color: controller.selectedOption.value == option.letter
+                                                    ? Color(0xff4839D4)
+                                                    : Colors.transparent,
+                                                borderRadius: BorderRadius.circular(10.0), // Rounded corners
                                               ),
-                                              child: Text(
-                                                option.letter,
-                                                style: const TextStyle(
-                                                  color: Color(0xff1A1C1E),
-                                                  fontWeight: FontWeight.bold,
-                                                  fontSize: 18.0,
-                                                ),
+                                              child: Row(
+                                                children: [
+                                                  // Letter inside a circular container
+                                                  Container(
+                                                    padding: const EdgeInsets.all(10.0),
+                                                    decoration: const BoxDecoration(
+                                                      shape: BoxShape.circle,
+                                                      color: Color(0XFFFFFFFF), // Background color of the letter container
+                                                    ),
+                                                    child: Text(
+                                                      option.letter, // Option letter
+                                                      style: const TextStyle(
+                                                        color: Color(0xff1A1C1E),
+                                                        fontWeight: FontWeight.bold,
+                                                        fontSize: 18.0,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                  const SizedBox(width: 12.0), // Space between the letter and text
+                                                  // Option text
+                                                  Expanded(
+                                                    child: Text(
+                                                      option.text,
+                                                      style: TextStyle(
+                                                        fontSize: 14.0,
+                                                        fontWeight: FontWeight.w500,
+                                                        color: controller.selectedOption.value == option.letter
+                                                            ? Colors.white
+                                                            : Colors.black,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ],
                                               ),
-                                            ),
-                                            const SizedBox(width: 12.0),
-                                            // Option text
-                                            Expanded(
-                                              child: Text(
-                                                option.text,
-                                                style: const TextStyle(
-                                                  fontSize: 14.0,
-                                                  fontWeight: FontWeight.w500,
-                                                  color: Colors.black,
-                                                ),
-                                              ),
-                                            ),
-                                          ],
-                                        ),
+                                            )),
+                                          );
+                                        },
                                       ),
-                                    );
-                                  });
-                                },
-                              ),
+                                    ),
+                                  ],
+                                );
+                              }),
                             ),
                             const SizedBox(height: 20),
                           ],
@@ -279,17 +276,40 @@ class McqsQuestionsView extends StatelessWidget {
                             backgroundColor: Colors.transparent,
                           ),
                           onPressed: () {
-                            scoreCardController.showConfetti;
-                            if (currentIndex ==
-                                mcqsController.mcqs.length - 1) {
-                              Get.to(() => const ScoreCardView(),
-                                  binding: BindingsBuilder(() {
-                                Get.put(ScoreCardController(
-                                    totalQuestions: 10, correctAnswers: 7));
-                              }));
-                              Get.toNamed('/scorecardview');
-                            } else {
-                              mcqsController.next();
+                            // scoreCardController.showConfetti;
+                            // if (currentIndex ==
+                            //     mcqsController.mcqs.length - 1) {
+                            //   Get.to(() => const ScoreCardView(),
+                            //       binding: BindingsBuilder(() {
+                            //     Get.put(ScoreCardController(
+                            //         totalQuestions: 10, correctAnswers: 7));
+                            //   }));
+                            //   Get.toNamed('/scorecardview');
+                            // } else {
+                            //   mcqsController.next();
+                            // }
+                            print('${controller.currentMcq.question}');
+                            print('Current Index of mcqs: ${controller.currentIndex.value}');
+                            print(controller.mcqs.length - 1 == controller.currentIndex.value);
+
+                            if(controller.mcqs.length - 1 > controller.currentIndex.value){
+                              // quizController.selectedOption('${quizController.mcqs[quizController.currentIndex.value]}');
+                              controller.currentIndex.value = controller.currentIndex.value + 1;
+                              controller.selectedOption.value =
+                              ''; // Clear selected option when switching
+                            }else{
+                              controller.score.value = 0;
+
+                              print('Score: ${controller.score.value}');
+                              Get.offNamed('/Scorecardview');
+                              controller.calculateScore();
+                              print('Score: ${controller.score.value}');
+
+                              // Get.delete<QuizController>(force: true)
+                              controller.currentIndex.value = 0;
+                              controller.selectedOption.value = '';
+                              // controller.score.value = 0;
+
                             }
                           },
                           child: Text(

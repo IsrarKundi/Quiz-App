@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:lottie/lottie.dart';
+import 'package:mcqs_app/app/modules/mcqs/controllers/mcqs_controller.dart';
 import 'package:mcqs_app/app/modules/mcqs/controllers/score_card_controller.dart'; // Import the controller
 
 class ScoreCardView extends StatelessWidget {
@@ -10,8 +11,11 @@ class ScoreCardView extends StatelessWidget {
   Widget build(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
     double screenHeight = MediaQuery.of(context).size.height;
-    final ScoreCardController scoreCardController =
-        Get.put(ScoreCardController(totalQuestions: 10, correctAnswers: 8));
+    final McqsController mcqsController = Get.put(McqsController());
+
+    // final ScoreCardController scoreCardController =
+    //     Get.put(ScoreCardController(totalQuestions: 10, correctAnswers: 8));
+
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -139,8 +143,8 @@ class ScoreCardView extends StatelessWidget {
                                 ),
                               ],
                             ),
-                            const Text(
-                              '05',
+                            Text(
+                              '${mcqsController.score.value}',
                               style: TextStyle(
                                 color: Colors.black,
                                 fontSize: 16,
@@ -159,7 +163,7 @@ class ScoreCardView extends StatelessWidget {
                                       0.0), // Smaller green circle
                             ),
                             child: Slider(
-                              value: 0.5,
+                              value: mcqsController.score.value/10,
                               onChanged: (value) {},
                               activeColor: Colors.green,
                               inactiveColor: Colors.grey,
@@ -219,8 +223,8 @@ class ScoreCardView extends StatelessWidget {
                                 ),
                               ],
                             ),
-                            const Text(
-                              '05',
+                            Text(
+                              '${10 - mcqsController.score.value}',
                               style: TextStyle(
                                 color: Colors.black,
                                 fontSize: 16,
@@ -240,7 +244,7 @@ class ScoreCardView extends StatelessWidget {
                                       0.0), // Smaller green circle
                             ),
                             child: Slider(
-                              value: 0.5,
+                              value: (10 - mcqsController.score.value)/10,
                               onChanged: (value) {},
                               activeColor: Colors.red,
                               inactiveColor: Colors.grey,
@@ -336,7 +340,9 @@ class ScoreCardView extends StatelessWidget {
 
                   ElevatedButton(
                     onPressed: () {
-                      Get.back();
+                      mcqsController.checkAndUpdateLevel();
+
+
                       // // Go back to the previous screen
                     },
                     style: ElevatedButton.styleFrom(
@@ -409,32 +415,35 @@ class ScoreCardView extends StatelessWidget {
                         Icons.cancel,
                         color: Colors.white,
                       ),
-                    )),
+                    )
+                ),
               ),
             ),
           ),
 
-          // Lottie Confetti Animation
-          Obx(() {
-            return scoreCardController.isConfettiVisible.value
-                ? Align(
-                    alignment: Alignment.center,
-                    child: Lottie.asset(
-                      'assets/images/scorecardconfetti.json', // Path to your Lottie JSON file
-                      width: 300, // Set the width for the confetti
-                      height: 300, // Set the height for the confetti
-                      repeat: true, // Play once
-                      onLoaded: (composition) {
-                        // Optionally, do something when the animation finishes
-                        Future.delayed(const Duration(seconds: 6), () {
-                          scoreCardController
-                              .hideConfetti(); // Hide confetti after 3 seconds
-                        });
-                      },
-                    ),
-                  )
-                : Container(); // If confetti is not visible, show nothing
-          }),
+          // // Lottie Confetti Animation
+          // Obx(() {
+          //   return
+          //     // scoreCardController.isConfettiVisible.value
+          //     //   ? Align(
+          //     //       alignment: Alignment.center,
+          //     //       child: Lottie.asset(
+          //     //         'assets/images/scorecardconfetti.json', // Path to your Lottie JSON file
+          //     //         width: 300, // Set the width for the confetti
+          //     //         height: 300, // Set the height for the confetti
+          //     //         repeat: true, // Play once
+          //     //         onLoaded: (composition) {
+          //     //           // Optionally, do something when the animation finishes
+          //     //           Future.delayed(const Duration(seconds: 6), () {
+          //     //             scoreCardController
+          //     //                 .hideConfetti(); // Hide confetti after 3 seconds
+          //     //           });
+          //     //         },
+          //     //       ),
+          //     //     )
+          //     //   :
+          //   Container(); // If confetti is not visible, show nothing
+          // }),
 
           // Center(
           //   child: Column(

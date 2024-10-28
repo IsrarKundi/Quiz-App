@@ -7,7 +7,7 @@ class McqsView extends GetView<McqsController> {
   const McqsView({super.key});
   @override
   Widget build(BuildContext context) {
-    final mcqscontroller = Get.put(McqsController());
+    final mcqsController = Get.put(McqsController());
     final ScrollController scrollController = ScrollController();
     double screenWidth = MediaQuery.of(context).size.width;
     double screenHeight = MediaQuery.of(context).size.height;
@@ -128,6 +128,7 @@ class McqsView extends GetView<McqsController> {
                       // Expanded GridView
                       Expanded(
                         child: GridView.builder(
+
                           controller: scrollController,
                           gridDelegate:
                               const SliverGridDelegateWithFixedCrossAxisCount(
@@ -138,9 +139,17 @@ class McqsView extends GetView<McqsController> {
                           itemCount:
                               imagePaths.length, // Number of items in the grid
                           itemBuilder: (context, index) {
+                            final category = mcqsController.categories[index];
+
                             return InkWell(
-                              onTap: () {
-                                Get.toNamed(Routes.McqsQuestionsView);
+                              onTap: () async {
+                                mcqsController.level.value = mcqsController.categories[index].level.value;
+                                mcqsController.topic.value = mcqsController.categories[index].title;
+                                mcqsController.categoryIndex.value = index;
+                                // print(quizController.level.value);
+                                await mcqsController.getMcqs(context);
+
+                                // Get.toNamed(Routes.McqsQuestionsView);
                               },
                               child: Container(
                                 decoration: BoxDecoration(
@@ -191,13 +200,15 @@ class McqsView extends GetView<McqsController> {
                                               crossAxisAlignment:
                                                   CrossAxisAlignment.start,
                                               children: [
-                                                const Text(
-                                                  'Level (01)',
-                                                  style: TextStyle(
-                                                    fontSize: 12.37,
-                                                    color: Colors.black,
-                                                  ),
-                                                ),
+                                                Obx((){
+                                                  return Text(
+                                                    'Level (${category.level.toString().padLeft(2, '0')})',
+                                                    style: TextStyle(
+                                                      fontSize: 12.37,
+                                                      color: Colors.black,
+                                                    ),
+                                                  );
+                                                }),
                                                 const SizedBox(width: 37),
                                                 Image.asset(
                                                   'assets/images/coins.png',

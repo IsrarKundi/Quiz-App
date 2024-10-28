@@ -8,7 +8,7 @@ import '../../helper/custom_widgets.dart';
 
 class categoryCard {
   final String title;
-  final int level;
+  RxInt level;
 
   categoryCard({required this.title, required this.level});
 }
@@ -138,7 +138,7 @@ class QuizController extends GetxController {
   void onInit() {
     super.onInit();
     Gemini.init(apiKey: '$geminiApiKey');
-
+    selectedOption.value = '';
     userSelections.assignAll(List<String?>.filled(mcqs.length, null));
 
 
@@ -150,6 +150,8 @@ class QuizController extends GetxController {
 
   // Observable to keep track of the current index
   var currentIndex = 0.obs;
+  final RxInt categoryIndex = 0.obs;
+
 
   // Observable to keep track of the selected option
   var selectedOption = ''.obs;
@@ -180,6 +182,21 @@ class QuizController extends GetxController {
 
   // Increment method for demonstration purposes
   void increment() => count.value++;
+
+  void checkAndUpdateLevel() {
+    if (score.value > 5) {
+      print(categories[categoryIndex.value].level.value);
+
+      // Increment the level
+      categories[categoryIndex.value].level.value++;
+
+      // Wait for the state to fully update, then navigate back
+      print(categories[categoryIndex.value].level.value);
+      Get.back();
+      print('after get back');
+
+    }
+  }
 
   @override
   void dispose() {
@@ -224,12 +241,12 @@ class QuizController extends GetxController {
 
 
   final RxList<categoryCard> categories = <categoryCard>[
-    categoryCard(title: 'Science', level: 02),
-    categoryCard(title: 'English', level: 01),
-    categoryCard(title: 'General Knowledge', level: 03),
-    categoryCard(title: 'World Current Affairs', level: 01),
-    categoryCard(title: 'Pakistan Current Affairs', level: 01),
-    categoryCard(title: 'Mathematics', level: 02),
+    categoryCard(title: 'Science', level: 02.obs),
+    categoryCard(title: 'English', level: 01.obs),
+    categoryCard(title: 'General Knowledge', level: 03.obs),
+    categoryCard(title: 'World Current Affairs', level: 01.obs),
+    categoryCard(title: 'Pakistan Current Affairs', level: 01.obs),
+    categoryCard(title: 'Mathematics', level: 02.obs),
   ].obs;
 
 
@@ -320,11 +337,12 @@ Mcq(
     // Split the response into lines and remove empty lines
     List<String> lines = responseText.split('\n').where((line) => line.trim().isNotEmpty).toList();
 
+
     for (String line in lines) {
       line = line.trim();
 
       // Detect the start of a new MCQ block
-      if (line.startsWith("Mcq(") || line.startsWith("**Mcq(") || line.startsWith("*") || startsWithRange(line, 1, 10)) {
+      if (line.startsWith("Mcq(") || line.startsWith("**")  || startsWithRange(line, 1, 10)) {
         if (currentQuestion != null && options.isNotEmpty) {
           mcqList.add(Mcq(question: currentQuestion, options: options));
         }
@@ -333,7 +351,7 @@ Mcq(
         currentQuestion = null;
         options = [];
         isOptionBlock = true;
-      } else if (isOptionBlock && line.startsWith("Option(")) {
+      } else if (isOptionBlock && (line.startsWith("Option(") || line.startsWith("-"))) {
         // Extract option details using regex
         final optionRegex = RegExp(r"Option\(letter: '([A-D])', text: '(.*?)', isCorrect: (true|false)\)");
         final match = optionRegex.firstMatch(line);
@@ -364,44 +382,65 @@ Mcq(
 
 
   String extractQuestion(String line) {
-    // Use a regular expression to extract the question text
-    final regex = RegExp(r"question:\s*'([^']*)'", caseSensitive: false);
-    final match = regex.firstMatch(line);
+    // Check if the line starts with 'question:' and then extract the question
+    if (line.startsWith("question:") || line.startsWith("Question:")) {
+      // Trim the 'question:' part from the line
+      String questionText = line.substring(9).trim(); // This removes 'question:'
 
-    // Check if a match was found and return the question text
-    if (match != null && match.groupCount > 0) {
-      return match.group(1) ?? "Unknown question format";
+      // If the question is surrounded by quotes, remove the quotes
+      if (questionText.startsWith("'") && questionText.endsWith("'")) {
+        questionText = questionText.substring(1, questionText.length - 1);
+      }
+
+      return questionText;
     }
 
-    // Fallback for cases where the question is not formatted correctly
+    // Fallback if the line doesn't start with 'question:'
     return "Unknown question format";
   }
 
 
+
+
   Option extractOption(String line) {
-    // Extracts option letter, text, and whether it's correct
-    final letterStart = line.indexOf("letter: '");
-    final letterEnd = line.indexOf("'", letterStart + 9);
+    // Check if the line starts with 'Option('
+    if (line.startsWith("Option(")) {
+      // Extract the letter
+      int letterStart = line.indexOf("letter: '") + 9; // Position after 'letter: '
+      int letterEnd = line.indexOf("'", letterStart); // Find closing quote
+      String letter = line.substring(letterStart, letterEnd).trim(); // Extract letter
 
-    // Ensure the letter extraction is valid
-    String letter = '';
-    if (letterStart != -1 && letterEnd != -1 && letterEnd > letterStart) {
-      letter = line.substring(letterStart + 9, letterEnd);
+      // Extract the text
+      int textStart = line.indexOf("text: '") + 7; // Position after 'text: '
+      int textEnd = line.indexOf("'", textStart); // Find closing quote
+      String text = line.substring(textStart, textEnd).trim(); // Extract text
+
+      // Determine if the option is correct
+      bool isCorrect = line.contains("isCorrect: true");
+
+      return Option(letter: letter, text: text, isCorrect: isCorrect);
     }
 
-    final textStart = line.indexOf("text: '");
-    final textEnd = line.indexOf("'", textStart + 7);
+    // Fallback for simpler option format (like with "- Option")
+    if (line.startsWith("- Option") || line.startsWith("Option")) {
+      // Extract the letter
+      int letterStart = line.indexOf("letter: '") + 9;
+      int letterEnd = line.indexOf("'", letterStart);
+      String letter = line.substring(letterStart, letterEnd).trim();
 
-    // Ensure the text extraction is valid
-    String text = '';
-    if (textStart != -1 && textEnd != -1 && textEnd > textStart) {
-      text = line.substring(textStart + 7, textEnd);
+      // Extract the text
+      int textStart = line.indexOf("text: '") + 7;
+      int textEnd = line.indexOf("'", textStart);
+      String text = line.substring(textStart, textEnd).trim();
+
+      // Determine if the option is correct
+      bool isCorrect = line.contains("isCorrect: true");
+
+      return Option(letter: letter, text: text, isCorrect: isCorrect);
     }
 
-    // Determine if the option is correct
-    final isCorrect = line.contains("isCorrect: true");
-    print(Option);
-    return Option(letter: letter, text: text, isCorrect: isCorrect);
+    // Return a default option if format doesn't match
+    return Option(letter: '', text: 'Unknown option', isCorrect: false);
   }
 
 }

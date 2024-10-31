@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:mcqs_app/app/modules/helper/custom_widgets.dart';
 import 'package:mcqs_app/app/modules/quiz/controllers/quiz_controller.dart';
 
 class QuizQuestions extends GetView<QuizController> {
@@ -172,24 +173,26 @@ class QuizQuestions extends GetView<QuizController> {
                         ],
                       );
                     }),
-                    const SizedBox(height: 20),
-                    Align(
-                      alignment: Alignment.center,
-                      child: Container(
-                        // color: Colors.yellow,
-                        width: 60, // Width of the circular timer
-                        height: 60, // Height of the circular timer
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          border: Border.all(
-                              color: Colors.blue,
-                              width: 4), // Border color and width
-                        ),
-                        child: const Center(
-                          child: Text('6'),
-                        ),
-                      ),
-                    ),
+                    const SizedBox(height: 0),
+                    // Align(
+                    //   alignment: Alignment.center,
+                    //   child: Container(
+                    //     // color: Colors.yellow,
+                    //     width: 60, // Width of the circular timer
+                    //     height: 60, // Height of the circular timer
+                    //     decoration: BoxDecoration(
+                    //       shape: BoxShape.circle,
+                    //       border: Border.all(
+                    //           color: Colors.blue,
+                    //           width: 4), // Border color and width
+                    //     ),
+                    //     child: const Center(
+                    //       child: Text('6'),
+                    //     ),
+                    //   ),
+                    // ),
+
+                  Obx(() => CountDownTimerWidget(key: ValueKey(controller.currentIndex.value))),
                     // Question and Options
                     Expanded(
                       child: Obx(() {
@@ -215,7 +218,6 @@ class QuizQuestions extends GetView<QuizController> {
                                   final option = controller.currentMcq.options[index];
                                   final isSelected = controller.selectedOption.value == option.letter;
                                   // final isCorrect = option.isCorrect;
-
                                   return GestureDetector(
                                     onTap: () {
                                       // Option selection logic

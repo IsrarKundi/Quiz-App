@@ -7,10 +7,24 @@ import 'package:mcqs_app/app/modules/mcqs/controllers/mcqs_controller.dart';
 import '../../helper/custom_widgets.dart';
 
 class categoryCard {
-  final String title;
+  String title;
   RxInt level;
 
   categoryCard({required this.title, required this.level});
+
+  Map<String, dynamic> toJson() {
+    return {
+      'title': title,
+      'level': level.value,
+    };
+  }
+
+  factory categoryCard.fromJson(Map<String, dynamic> json) {
+    return categoryCard(
+      title: json['title'],
+      level: (json['level'] as int).obs,
+    );
+  }
 }
 
 
@@ -444,5 +458,9 @@ Mcq(
     // Return a default option if format doesn't match
     return Option(letter: '', text: 'Unknown option', isCorrect: false);
   }
+
+
+
+
 
 }

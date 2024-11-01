@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gemini/flutter_gemini.dart';
 import 'package:get/get.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../helper/custom_widgets.dart';
 import '../../quiz/controllers/quiz_controller.dart';
@@ -151,7 +152,7 @@ class McqsController extends GetxController {
     Gemini.init(apiKey: '$geminiApiKey');
     selectedOption.value = '';
     userSelections.assignAll(List<String?>.filled(mcqs.length, null));
-
+    loadCategoryLevels(); // Load saved levels on initialization
 
   }
 
@@ -201,14 +202,19 @@ class McqsController extends GetxController {
     if (score.value > 5) {
       print(categories[categoryIndex.value].level.value);
 
-      // Increment the level
-      categories[categoryIndex.value].level.value++;
+      if(categories[categoryIndex.value].level.value < 5){
+        // Increment the level
+        categories[categoryIndex.value].level.value++;
+        saveCategoryLevel(categoryIndex.value, categories[categoryIndex.value].level.value);
+      }
 
       // Wait for the state to fully update, then navigate back
       print(categories[categoryIndex.value].level.value);
       Get.back();
       print('after get back');
 
+    } else {
+      Get.back();
     }
   }
 
@@ -254,14 +260,29 @@ class McqsController extends GetxController {
   ];
 
 
+  ///...........................LIST OF CATEGORIES AND LOGIC FOR STORING LEVELS IN LOCAL STORAGE...............................
+
   final RxList<categoryCard> categories = <categoryCard>[
-    categoryCard(title: 'Science', level: 02.obs),
-    categoryCard(title: 'English', level: 01.obs),
-    categoryCard(title: 'General Knowledge', level: 03.obs),
-    categoryCard(title: 'World Current Affairs', level: 01.obs),
-    categoryCard(title: 'Pakistan Current Affairs', level: 01.obs),
-    categoryCard(title: 'Mathematics', level: 02.obs),
+    categoryCard(title: 'Science', level: 1.obs),
+    categoryCard(title: 'English', level: 1.obs),
+    categoryCard(title: 'General Knowledge', level: 1.obs),
+    categoryCard(title: 'World Current Affairs', level: 1.obs),
+    categoryCard(title: 'Pakistan Current Affairs', level: 1.obs),
+    categoryCard(title: 'Mathematics', level: 1.obs),
   ].obs;
+
+  Future<void> loadCategoryLevels() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    for (int i = 0; i < categories.length; i++) {
+      int savedLevel = prefs.getInt('category_${i}_level') ?? 1; // Default to 1 if not found
+      categories[i].level.value = savedLevel;
+    }
+  }
+
+  Future<void> saveCategoryLevel(int index, int level) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setInt('category_${index}_level', level);
+  }
 
 
   ///................................GENERATING MCQs................................

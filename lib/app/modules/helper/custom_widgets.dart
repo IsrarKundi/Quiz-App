@@ -106,11 +106,11 @@ class _CountDownTimerWidgetState extends State<CountDownTimerWidget>
             duration: 6, // Set duration to 6 seconds
             initialDuration: 0,
             controller: _controller,
-            width: MediaQuery.of(context).size.width / 7,
-            height: MediaQuery.of(context).size.height / 7,
+            width: MediaQuery.of(context).size.width / 8,
+            height: MediaQuery.of(context).size.height / 8,
             ringColor: Colors.grey[300]!,
             fillColor: Colors.blue!,
-            strokeWidth: 3.0,
+            strokeWidth: 4.0,
             strokeCap: StrokeCap.round,
             textStyle: const TextStyle(
               fontSize: 16.0,

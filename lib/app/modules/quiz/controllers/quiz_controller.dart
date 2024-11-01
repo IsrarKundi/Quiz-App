@@ -3,28 +3,15 @@ import 'package:flutter_gemini/flutter_gemini.dart';
 import 'package:get/get.dart';
 import 'package:get/get_rx/get_rx.dart';
 import 'package:mcqs_app/app/modules/mcqs/controllers/mcqs_controller.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../helper/custom_widgets.dart';
 
 class categoryCard {
-  String title;
+  final String title;
   RxInt level;
 
   categoryCard({required this.title, required this.level});
-
-  Map<String, dynamic> toJson() {
-    return {
-      'title': title,
-      'level': level.value,
-    };
-  }
-
-  factory categoryCard.fromJson(Map<String, dynamic> json) {
-    return categoryCard(
-      title: json['title'],
-      level: (json['level'] as int).obs,
-    );
-  }
 }
 
 
@@ -155,6 +142,8 @@ class QuizController extends GetxController {
     selectedOption.value = '';
     userSelections.assignAll(List<String?>.filled(mcqs.length, null));
 
+    loadCategoryLevels(); // Load saved levels on initialization
+
 
   }
 
@@ -202,15 +191,18 @@ class QuizController extends GetxController {
   void checkAndUpdateLevel() {
     if (score.value > 5) {
       print(categories[categoryIndex.value].level.value);
-
-      // Increment the level
-      categories[categoryIndex.value].level.value++;
-
+      if(categories[categoryIndex.value].level.value < 5){
+        // Increment the level
+        categories[categoryIndex.value].level.value++;
+        saveCategoryLevel(categoryIndex.value, categories[categoryIndex.value].level.value);
+      }
       // Wait for the state to fully update, then navigate back
       print(categories[categoryIndex.value].level.value);
       Get.back();
       print('after get back');
 
+    } else {
+      Get.back();
     }
   }
 
@@ -255,15 +247,29 @@ class QuizController extends GetxController {
     // Add more image paths or URLs
   ];
 
+  ///...........................LIST OF CATEGORIES AND LOGIC FOR STORING LEVELS IN LOCAL STORAGE...............................
 
   final RxList<categoryCard> categories = <categoryCard>[
-    categoryCard(title: 'Science', level: 02.obs),
-    categoryCard(title: 'English', level: 01.obs),
-    categoryCard(title: 'General Knowledge', level: 03.obs),
-    categoryCard(title: 'World Current Affairs', level: 01.obs),
-    categoryCard(title: 'Pakistan Current Affairs', level: 01.obs),
-    categoryCard(title: 'Mathematics', level: 02.obs),
+    categoryCard(title: 'Science', level: 1.obs),
+    categoryCard(title: 'English', level: 1.obs),
+    categoryCard(title: 'General Knowledge', level: 1.obs),
+    categoryCard(title: 'World Current Affairs', level: 1.obs),
+    categoryCard(title: 'Pakistan Current Affairs', level: 1.obs),
+    categoryCard(title: 'Mathematics', level: 1.obs),
   ].obs;
+
+  Future<void> loadCategoryLevels() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    for (int i = 0; i < categories.length; i++) {
+      int savedLevel = prefs.getInt('category_${i}_level') ?? 1; // Default to 1 if not found
+      categories[i].level.value = savedLevel;
+    }
+  }
+
+  Future<void> saveCategoryLevel(int index, int level) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setInt('category_${index}_level', level);
+  }
 
 
   ///................................GENERATING QUIZ................................
@@ -283,11 +289,17 @@ class QuizController extends GetxController {
     try {
 
       var prompt = '''
-Generate 10 multiple choice questions (MCQs) for $topic, focusing on level $level.
-Format each MCQ in the following format:
+Generate 10 multiple choice questions (MCQs) on the topic "$topic", designed for level $level. Each question should reflect the difficulty appropriate to level $level, where:
+- Level 1 is introductory
+- Level 2 is basic
+- Level 3 is intermediate
+- Level 4 is advanced
+- Level 5 is expert
+
+Please ensure each question follows this structure precisely:
 
 Mcq(
-  question: 'Your question?',
+  question: 'Clearly phrased question here',
   options: [
     Option(letter: 'A', text: 'Answer 1', isCorrect: true/false),
     Option(letter: 'B', text: 'Answer 2', isCorrect: true/false),
@@ -295,7 +307,17 @@ Mcq(
     Option(letter: 'D', text: 'Answer 4', isCorrect: true/false),
   ],
 ),
+
+**Guidelines**:
+1. Ensure one option has `isCorrect: true` and the others have `isCorrect: false`.
+2. Align question complexity with level $level:
+   - For levels 1-2: Focus on basic knowledge and concepts.
+   - For levels 3-4: Include intermediate to advanced understanding, requiring analysis or comprehension.
+   - For level 5: Use expert-level knowledge with complex, analytical questions.
+
+Format your response exactly as shown in the structure above.
 ''';
+
 
       print('before request is made');
 

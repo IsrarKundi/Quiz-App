@@ -209,7 +209,7 @@ class QuizQuestions extends GetView<QuizController> {
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
-                            const SizedBox(height: 5),
+                            const SizedBox(height: 0),
                             // Display Options
                             Expanded(
                               child: ListView.builder(
@@ -223,10 +223,7 @@ class QuizQuestions extends GetView<QuizController> {
                                       // Option selection logic
                                       controller.selectOption(option.letter);
                                       // quizController.selectedOption.value = '';
-                                      // Get.snackbar(
-                                      //   'Option Selected',
-                                      //   'You selected ${option.letter}: ${option.text}',
-                                      // );
+
                                     },
                                     child: Obx(() => Container(
                                       margin: const EdgeInsets.symmetric(vertical: 5.0), // Adds space between containers
@@ -337,8 +334,10 @@ class QuizQuestions extends GetView<QuizController> {
 
 
                           },
-                          child: const Text(
-                            'Next',
+                          child: Text(
+                            controller.currentIndex == controller.mcqs.length - 1
+                                ? 'Submit'
+                                : 'Next',
                             style: TextStyle(
                                 fontSize: 16, fontWeight: FontWeight.bold),
                           ),
